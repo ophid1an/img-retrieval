@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const algorithmsSupported = require('../utils/config').algorithmsSupported;
+const algorithmsSupported = require('../config/server.conf').algorithmsSupported;
 
 const Schema = mongoose.Schema;
 const imageObj = {
