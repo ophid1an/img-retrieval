@@ -1,7 +1,6 @@
-exports.dbURL = 'mongodb://localhost/mm-dbs-project';
+exports.dbURI = process.env.MONGODB_URI || 'mongodb://localhost/mm-dbs-project'
 
-exports.algorithmsSupported = [
-  {
+exports.algorithmsSupported = [{
     name: 'gist',
     len: 512,
   },

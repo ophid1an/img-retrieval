@@ -19,6 +19,7 @@ selenium-debug.log
 #
 misc/
 public/
+.env
 
 
 # Logs

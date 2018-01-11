@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -6,13 +8,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 const mongoose = require('mongoose');
-const dbURL = require('./config/server.conf').dbURL;
+const dbURI = require('./config/server.conf').dbURI;
 
 var api = require('./routes/api');
 
 var app = express();
 
-mongoose.connect(dbURL, {
+mongoose.connect(dbURI, {
   useMongoClient: true,
 });
 mongoose.Promise = global.Promise;
