@@ -6,7 +6,7 @@ const numNeighbors = require('../config/server.conf').numNeighbors;
 
 const router = express.Router();
 
-/* GET users listing. */
+
 router.get('/find/:filename', (req, res, next) => {
   const filename = req.params.filename;
   if (!filename || typeof filename !== 'string') {
@@ -26,6 +26,7 @@ router.get('/find/:filename', (req, res, next) => {
     .catch(err => next(err));
 });
 
+
 router.get('/find-full/:filename', (req, res, next) => {
   const filename = req.params.filename;
   if (!filename || typeof filename !== 'string') {
@@ -41,6 +42,22 @@ router.get('/find-full/:filename', (req, res, next) => {
     .then(docs => res.json(docs))
     .catch(err => next(err));
 });
+
+
+router.get('/random', (req, res, next) => {
+  const numberOfImages = numNeighbors;
+  return Image
+    .aggregate()
+    .sample(numberOfImages)
+    .project({
+      filename: 1,
+      annotations: 1,
+      _id: 0,
+    })
+    .then(docs => res.json(docs))
+    .catch(err => next(err));
+});
+
 
 router.post('/compare', (req, res, next) => {
   const filename = req.body.filename;
