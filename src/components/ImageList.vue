@@ -1,6 +1,6 @@
 <template>
 <div class="columns is-multiline">
-  <image-card v-for="image in images" class="column is-one-fifth" :init="image"></image-card>
+  <image-card v-for="image in images" :init="image"></image-card>
 </div>
 </template>
 
