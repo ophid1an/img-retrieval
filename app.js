@@ -8,11 +8,16 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 const mongoose = require('mongoose');
+const compression = require('compression');
+const helmet = require('helmet');
 const dbURI = require('./config/server.conf').dbURI;
 
 var api = require('./routes/api');
 
 var app = express();
+
+app.use(compression());
+app.use(helmet());
 
 mongoose.connect(dbURI, {
   useMongoClient: true,
