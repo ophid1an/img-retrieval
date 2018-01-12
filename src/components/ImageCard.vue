@@ -2,7 +2,7 @@
 <div class="column is-one-fifth">
   <div class="card">
     <header class="card-header">
-      <p class="card-header-title is-centered">
+      <p class="card-header-title is-centered" @click="imageSelected">
         {{ init.filename }}
       </p>
     </header>
@@ -14,7 +14,8 @@
     </div>
 
     <div class="card-content">
-      <span v-for="ann in init.annotations">{{ ann }} </span>
+      <p v-if="init.distance"><strong>Distance: {{ Number(init.distance).toFixed(5) }}</strong></p>
+      <p> <span v-for="ann in init.annotations">{{ ann }} </span> </p>
     </div>
   </div>
 </div>
@@ -27,6 +28,9 @@ export default {
   methods: {
     imageClicked() {
       Event.$emit('imageClicked', this.getSrc);
+    },
+    imageSelected() {
+      Event.$emit('imageSelected', this.init.filename);
     },
   },
   computed: {

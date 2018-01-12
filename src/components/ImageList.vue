@@ -18,12 +18,32 @@ export default {
       images: [],
     };
   },
-  mounted() {
+  created() {
     axios.get('/api/random')
       .then((res) => {
         this.images = res.data;
       })
       .catch(err => console.log(err));
+
+    Event.$on('compareImage', ({
+      filename,
+      metricSelected,
+      algsSelected,
+    }) => {
+      const vecs = {};
+      algsSelected.forEach((alg) => {
+        vecs[alg] = [];
+      });
+      axios.post('/api/compare', {
+          filename,
+          metric: metricSelected,
+          vecs,
+        })
+        .then((res) => {
+          this.images = res.data;
+        })
+        .catch(err => console.log(err));
+    });
   },
 };
 </script>
