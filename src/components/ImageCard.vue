@@ -14,7 +14,7 @@
     </div>
 
     <div class="card-content">
-      <p v-if="init.distance"><strong>Distance: {{ Number(init.distance).toFixed(5) }}</strong></p>
+      <p v-if="hasDistance"><strong>Distance: {{ Number(init.distance).toFixed(5) }}</strong></p>
       <p> <span v-for="ann in init.annotations">{{ ann }} </span> </p>
     </div>
   </div>
@@ -36,6 +36,9 @@ export default {
   computed: {
     getSrc() {
       return `/static/images/data/${this.init.filename}`;
+    },
+    hasDistance() {
+      return typeof this.init.distance !== 'undefined';
     },
   },
 };

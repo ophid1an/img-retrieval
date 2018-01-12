@@ -31,6 +31,11 @@ export default {
       algsSelected,
     }) => {
       const vecs = {};
+      this.images.forEach((img) => {
+        img.filename = 'waiting.png';
+        img.annotations = [];
+        img.distance = undefined;
+      });
       algsSelected.forEach((alg) => {
         vecs[alg] = [];
       });
