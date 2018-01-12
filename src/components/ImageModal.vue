@@ -2,11 +2,11 @@
 <div class="modal is-active">
   <div class="modal-background"></div>
   <div class="modal-content">
-    <p class="image">
+    <p class="image" @click="onImageModalClose">
       <img :src="src" alt="">
     </p>
   </div>
-  <button class="modal-close is-large" aria-label="close" @click="imageModalClosed"></button>
+  <button class="modal-close is-large" aria-label="close" @click="onImageModalClose"></button>
 </div>
 </template>
 
@@ -19,7 +19,7 @@ export default {
     };
   },
   methods: {
-    imageModalClosed() {
+    onImageModalClose() {
       Event.$emit('imageModalClosed');
     },
   },

@@ -26,13 +26,27 @@ export default {
       .catch(err => console.log(err));
 
     Event.$on('compareImage', ({
+      metric,
+      vecs,
+    }) => {
+      axios.post('/api/compare', {
+          metric,
+          vecs,
+        })
+        .then((res) => {
+          this.images = res.data;
+        })
+        .catch(err => console.log(err));
+    });
+
+    Event.$on('compareImageFromDB', ({
       filename,
-      metricSelected,
+      metric,
       algsSelected,
     }) => {
       const vecs = {};
       this.images.forEach((img) => {
-        img.filename = 'waiting.png';
+        img.filename = '__waiting__';
         img.annotations = [];
         img.distance = undefined;
       });
@@ -41,7 +55,7 @@ export default {
       });
       axios.post('/api/compare', {
           filename,
-          metric: metricSelected,
+          metric,
           vecs,
         })
         .then((res) => {

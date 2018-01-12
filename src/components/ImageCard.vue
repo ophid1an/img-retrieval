@@ -2,14 +2,14 @@
 <div class="column is-one-fifth">
   <div class="card">
     <header class="card-header">
-      <p v-if="!waiting" class="card-header-title is-centered" @click="imageSelected">
+      <p v-if="!waiting" class="card-header-title is-centered" @click="onFilenameClick">
         {{ init.filename }}
       </p>
     </header>
 
     <div class="card-image">
       <figure class="image">
-        <img :src="getSrc" alt="Placeholder image" @click="imageClicked">
+        <img :src="getSrc" alt="Placeholder image" @click="onImageClick">
       </figure>
     </div>
 
@@ -26,20 +26,25 @@ export default {
   name: 'image-card',
   props: ['init'],
   methods: {
-    imageClicked() {
+    onImageClick() {
       Event.$emit('imageClicked', this.getSrc);
     },
-    imageSelected() {
+    onFilenameClick() {
       Event.$emit('imageSelected', this.init.filename);
     },
   },
+  data() {
+    return {
+      waitingFilename: '/static/images/waiting.png',
+      dataImagesPath: '/static/images/data/',
+    };
+  },
   computed: {
     waiting() {
-      return this.init.filename === 'waiting.png';
+      return this.init.filename === '__waiting__';
     },
     getSrc() {
-      return this.waiting ? `/static/images/${this.init.filename}` :
-        `/static/images/data/${this.init.filename}`;
+      return this.waiting ? this.waitingFilename : `${this.dataImagesPath}${this.init.filename}`;
     },
     hasDistance() {
       return typeof this.init.distance !== 'undefined';

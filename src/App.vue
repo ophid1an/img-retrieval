@@ -3,7 +3,7 @@
   <section class="section has-text-centered">
     <div class="container">
       <h1 class="title">
-          Image Retrieval
+          Image Retrieval Project
       </h1>
     </div>
   </section>
@@ -11,7 +11,63 @@
   <image-modal v-show="showImageModal"></image-modal>
 
   <section class="section">
-    <div class="container">
+    <div class="container box">
+
+      <div class="form">
+        <div class="icon has-text-link" @click="onFormAngleClick">
+          <i :class="{ 'fa fa-2x fa-angle-right': isFormHidden, 'fa fa-2x fa-angle-down': !isFormHidden }"></i>
+        </div>
+
+        <form :class="{ 'is-hidden': isFormHidden}" @submit.prevent="onFormSubmit">
+          <div class="field">
+            <label class="label" v-text="algs[0].text"></label>
+            <div class="control">
+              <input class="input" type="text" v-model="algs[0].vectorStr" :placeholder="`${algs[0].len} features`">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" v-text="algs[1].text"></label>
+            <div class="control">
+              <input class="input" type="text" v-model="algs[1].vectorStr" :placeholder="`${algs[1].len} features`">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" v-text="algs[2].text"></label>
+            <div class="control">
+              <input class="input" type="text" v-model="algs[2].vectorStr" :placeholder="`${algs[2].len} features`">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" v-text="algs[3].text"></label>
+            <div class="control">
+              <input class="input" type="text" v-model="algs[3].vectorStr" :placeholder="`${algs[3].len} features`">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" v-text="algs[4].text"></label>
+            <div class="control">
+              <input class="input" type="text" v-model="algs[4].vectorStr" :placeholder="`${algs[4].len} features`">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" v-text="algs[5].text"></label>
+            <div class="control">
+              <input class="input" type="text" v-model="algs[5].vectorStr" :placeholder="`${algs[5].len} features`">
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <button class="button is-link">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
 
       <div class="field">
         <label class="label">Metric</label>
@@ -61,7 +117,7 @@
   </section>
 
   <section class="section">
-    <div class="container">
+    <div class="container box">
       <image-list></image-list>
     </div>
   </section>
@@ -89,6 +145,7 @@ export default {
   },
   data() {
     return {
+      isFormHidden: true,
       metricSelected: 'euclidean',
       metrics: [{
           text: 'Euclidean distance',
@@ -107,36 +164,96 @@ export default {
       algs: [{
           text: 'GIST',
           value: 'gist',
-          vector: [],
+          len: 512,
+          vectorStr: '',
         },
         {
           text: 'HSV Histogram',
           value: 'hsvHist',
-          vector: [],
+          len: 343,
+          vectorStr: '',
         },
         {
           text: 'HSV Histogram Layout',
           value: 'hsvHistLayout',
-          vector: [],
+          len: 375,
+          vectorStr: '',
         },
         {
           text: 'RGB Histogram',
           value: 'rgbHist',
-          vector: [],
+          len: 343,
+          vectorStr: '',
         },
         {
           text: 'SFTA',
           value: 'sfta',
-          vector: [],
+          len: 42,
+          vectorStr: '',
         },
         {
           text: 'SIFT',
           value: 'sift',
-          vector: [],
+          len: 100,
+          vectorStr: '',
         },
       ],
       showImageModal: false,
     };
+  },
+  methods: {
+    onFormAngleClick() {
+      this.isFormHidden = !this.isFormHidden;
+    },
+    onFormSubmit() {
+      const vecs = {};
+      this.algs.forEach((alg) => {
+        if (alg.vectorStr) {
+          let vectorStrArr = alg.vectorStr.trim().split(',');
+
+          if (vectorStrArr.length === 1) {
+            vectorStrArr = vectorStrArr[0].split(' ');
+          }
+
+          if (vectorStrArr.length === alg.len) {
+            vecs[alg.value] = vectorStrArr;
+
+            // TODO: Verify object
+
+            // algorithmsSupported.forEach((alg) => {
+            //   const tmpVec = lineArr.splice(0, alg.len);
+            //   let discardVec = false;
+            //   const vec = tmpVec.map((e) => {
+            //     const num = Number(e.trim());
+            //     if (Number.isNaN(num)) {
+            //       discardVec = true;
+            //     }
+            //     return num;
+            //   });
+            //   if (!discardVec) {
+            //     discardImage = false;
+            //   }
+            //   image[alg.name] = discardVec ? [] : vec;
+            // });
+            // image.annotations = lineArr.map(e => e.trim());
+            // if (!discardImage) {
+            //   images.push(Object.assign({}, image));
+            // }
+            // Object.keys(image).forEach((key) => {
+            //   image[key] = null;
+            // });
+            // discardImage = true;
+          }
+        }
+      });
+
+      if (Object.keys(vecs).length) {
+        Event.$emit('compareImage', {
+          metric: this.metricSelected,
+          vecs,
+        });
+      }
+    },
   },
   created() {
     Event.$on('imageClicked', () => {
@@ -147,9 +264,9 @@ export default {
       if (!this.algsSelected.length) {
         this.algsSelected.push(this.algs[0].value);
       }
-      Event.$emit('compareImage', {
+      Event.$emit('compareImageFromDB', {
         filename,
-        metricSelected: this.metricSelected,
+        metric: this.metricSelected,
         algsSelected: this.algsSelected,
       });
     });
@@ -167,13 +284,19 @@ html {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='52' viewBox='0 0 52 52'%3E%3Cpath fill='%232a584a' fill-opacity='0.05' d='M0 17.83V0h17.83a3 3 0 0 1-5.66 2H5.9A5 5 0 0 1 2 5.9v6.27a3 3 0 0 1-2 5.66zm0 18.34a3 3 0 0 1 2 5.66v6.27A5 5 0 0 1 5.9 52h6.27a3 3 0 0 1 5.66 0H0V36.17zM36.17 52a3 3 0 0 1 5.66 0h6.27a5 5 0 0 1 3.9-3.9v-6.27a3 3 0 0 1 0-5.66V52H36.17zM0 31.93v-9.78a5 5 0 0 1 3.8.72l4.43-4.43a3 3 0 1 1 1.42 1.41L5.2 24.28a5 5 0 0 1 0 5.52l4.44 4.43a3 3 0 1 1-1.42 1.42L3.8 31.2a5 5 0 0 1-3.8.72zm52-14.1a3 3 0 0 1 0-5.66V5.9A5 5 0 0 1 48.1 2h-6.27a3 3 0 0 1-5.66-2H52v17.83zm0 14.1a4.97 4.97 0 0 1-1.72-.72l-4.43 4.44a3 3 0 1 1-1.41-1.42l4.43-4.43a5 5 0 0 1 0-5.52l-4.43-4.43a3 3 0 1 1 1.41-1.41l4.43 4.43c.53-.35 1.12-.6 1.72-.72v9.78zM22.15 0h9.78a5 5 0 0 1-.72 3.8l4.44 4.43a3 3 0 1 1-1.42 1.42L29.8 5.2a5 5 0 0 1-5.52 0l-4.43 4.44a3 3 0 1 1-1.41-1.42l4.43-4.43a5 5 0 0 1-.72-3.8zm0 52c.13-.6.37-1.19.72-1.72l-4.43-4.43a3 3 0 1 1 1.41-1.41l4.43 4.43a5 5 0 0 1 5.52 0l4.43-4.43a3 3 0 1 1 1.42 1.41l-4.44 4.43c.36.53.6 1.12.72 1.72h-9.78zm9.75-24a5 5 0 0 1-3.9 3.9v6.27a3 3 0 1 1-2 0V31.9a5 5 0 0 1-3.9-3.9h-6.27a3 3 0 1 1 0-2h6.27a5 5 0 0 1 3.9-3.9v-6.27a3 3 0 1 1 2 0v6.27a5 5 0 0 1 3.9 3.9h6.27a3 3 0 1 1 0 2H31.9z'%3E%3C/path%3E%3C/svg%3E");
 }
 
-.container {
-  padding: 10px;
-  border-radius: 6px;
-  background-color: #55827dcc;
-  -webkit-box-shadow: 10px 10px 16px 1px rgba(38, 85, 87, 1);
-  -moz-box-shadow: 10px 10px 16px 1px rgba(38, 85, 87, 1);
-  box-shadow: 10px 10px 16px 1px rgba(38, 85, 87, 1);
+.box {
+  background-color: #bccfd2;
+}
+
+.icon {
+  border: 1px #777 solid;
+  margin-bottom: 1em;
+}
+
+.form {
+  border-bottom: 1px #777 solid;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
 }
 
 .footer {

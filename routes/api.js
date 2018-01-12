@@ -128,6 +128,10 @@ router.post('/compare', (req, res, next) => {
   }
 
   const compareImages = () => {
+    if (!algs.length) {
+      return res.json([]);
+    }
+
     const projection = {
       filename: 1,
       annotations: 1,
@@ -219,12 +223,43 @@ router.post('/compare', (req, res, next) => {
             vecs[alg].ranges = vecRanges;
           }
         });
-        if (!algs.length) {
-          return res.json([]);
-        }
+
         return compareImages();
       })
       .catch(err => next(err));
+  } else {
+    const tmpAlgs = algs.map(x => x);
+    for (let i = 0, len = tmpAlgs.length; i < len; i += 1) {
+      const alg = tmpAlgs[i];
+      if (!Array.isArray(vecs[alg]) ||
+        vecs[alg].length !== algorithmsSupportedObj[alg]) {
+        algs.splice(algs.indexOf(alg), 1);
+        continue;
+      }
+
+      const vecRanges = [];
+      let discardVec = false;
+      const vec = vecs[alg].map((e) => {
+        const val = Number(e);
+        if (Number.isNaN(val)) {
+          discardVec = true;
+        }
+        vecRanges.push([val, val]);
+        return val;
+      });
+
+      if (discardVec || vec.length !== algorithmsSupportedObj[alg]) {
+        algs.splice(algs.indexOf(alg), 1);
+        continue;
+      }
+
+      vecs[alg] = {
+        vec,
+        ranges: [],
+      };
+      vecs[alg].ranges = vecRanges;
+    }
+    return compareImages();
   }
 });
 
