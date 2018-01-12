@@ -2,7 +2,7 @@
 <div class="column is-one-fifth">
   <div class="card">
     <header class="card-header">
-      <p class="card-header-title is-centered" @click="imageSelected">
+      <p v-if="!waiting" class="card-header-title is-centered" @click="imageSelected">
         {{ init.filename }}
       </p>
     </header>
@@ -13,7 +13,7 @@
       </figure>
     </div>
 
-    <div class="card-content">
+    <div v-if="!waiting" class="card-content">
       <p v-if="hasDistance"><strong>Distance: {{ Number(init.distance).toFixed(5) }}</strong></p>
       <p> <span v-for="ann in init.annotations">{{ ann }} </span> </p>
     </div>
@@ -34,8 +34,12 @@ export default {
     },
   },
   computed: {
+    waiting() {
+      return this.init.filename === 'waiting.png';
+    },
     getSrc() {
-      return `/static/images/data/${this.init.filename}`;
+      return this.waiting ? `/static/images/${this.init.filename}` :
+        `/static/images/data/${this.init.filename}`;
     },
     hasDistance() {
       return typeof this.init.distance !== 'undefined';
