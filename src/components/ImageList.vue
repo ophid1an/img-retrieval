@@ -46,9 +46,10 @@ export default {
     }) => {
       const vecs = {};
       this.images.forEach((img) => {
-        img.filename = '__waiting__';
-        img.annotations = [];
-        img.distance = undefined;
+        const image = img;
+        image.filename = '__waiting__';
+        image.annotations = [];
+        image.distance = undefined;
       });
       algsSelected.forEach((alg) => {
         vecs[alg] = [];

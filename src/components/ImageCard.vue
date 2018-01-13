@@ -44,7 +44,7 @@ export default {
     waiting() {
       return this.init.filename === '__waiting__';
     },
-    getImageSrc(){
+    getImageSrc() {
       return `${this.imagesPath}${this.init.filename}`;
     },
     getThumbSrc() {
