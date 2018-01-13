@@ -225,11 +225,13 @@ export default {
     onFormSubmit() {
       if (this.isFormSubmissible) {
         const vecs = {};
-        this.algs.forEach((alg) => {
+        this.algs.forEach((algor) => {
+          const alg = algor;
           const vec = alg.vec;
           if (vec.length) {
             vecs[alg.value] = vec;
           }
+          alg.vecStr = '';
         });
         Event.$emit('compareImage', {
           metric: this.metricSelected,
