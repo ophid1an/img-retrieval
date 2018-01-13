@@ -9,7 +9,7 @@
 
     <div class="card-image">
       <figure class="image">
-        <img :src="getSrc" alt="Placeholder image" @click="onImageClick">
+        <img :src="getThumbSrc" alt="Placeholder image" @click="onImageClick">
       </figure>
     </div>
 
@@ -27,7 +27,7 @@ export default {
   props: ['init'],
   methods: {
     onImageClick() {
-      Event.$emit('imageClicked', this.getSrc);
+      Event.$emit('imageClicked', this.getImageSrc);
     },
     onFilenameClick() {
       Event.$emit('imageSelected', this.init.filename);
@@ -36,15 +36,19 @@ export default {
   data() {
     return {
       waitingFilename: '/static/images/waiting.png',
-      dataImagesPath: '/static/images/data/',
+      imagesPath: '/static/images/data/',
+      thumbsPath: '/static/images/data/thumbs/',
     };
   },
   computed: {
     waiting() {
       return this.init.filename === '__waiting__';
     },
-    getSrc() {
-      return this.waiting ? this.waitingFilename : `${this.dataImagesPath}${this.init.filename}`;
+    getImageSrc(){
+      return `${this.imagesPath}${this.init.filename}`;
+    },
+    getThumbSrc() {
+      return this.waiting ? this.waitingFilename : `${this.thumbsPath}${this.init.filename}`;
     },
     hasDistance() {
       return typeof this.init.distance !== 'undefined';
@@ -54,9 +58,10 @@ export default {
 </script>
 
 <style scoped>
-/*.image img {
-  object-fit: scale-down;
-}*/
+.card-header,
+.card-image {
+  cursor: pointer;
+}
 
 .card-content {
   text-align: center;
