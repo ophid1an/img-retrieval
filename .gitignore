@@ -20,6 +20,8 @@ selenium-debug.log
 misc/
 public/
 .env
+*.bak
+*.bak.*
 
 
 # Logs

@@ -1,71 +1,43 @@
 <template>
 <div>
-  <section class="section has-text-centered">
-    <div class="container">
+  <section class="section">
+    <div class="container has-text-centered">
       <h1 class="title">
           Image Retrieval Project
       </h1>
     </div>
   </section>
 
-  <image-modal v-show="showImageModal"></image-modal>
+  <image-modal v-show="isImageModalVisible"></image-modal>
 
   <section class="section">
     <div class="container box">
 
       <div class="form">
         <div class="icon has-text-link" @click="onFormAngleClick">
-          <i :class="{ 'fa fa-2x fa-angle-right': isFormHidden, 'fa fa-2x fa-angle-down': !isFormHidden }"></i>
+          <i class="fa fa-2x" :class="{ 'fa-angle-right': !isFormVisible, 'fa-angle-down': isFormVisible }"></i>
         </div>
 
-        <form :class="{ 'is-hidden': isFormHidden}" @submit.prevent="onFormSubmit">
-          <div class="field">
-            <label class="label" v-text="algs[0].text"></label>
-            <div class="control">
-              <input class="input" type="text" v-model="algs[0].vectorStr" :placeholder="`${algs[0].len} features`">
-            </div>
-          </div>
+        <form :class="{ 'is-hidden': !isFormVisible}" @submit.prevent="onFormSubmit">
 
-          <div class="field">
-            <label class="label" v-text="algs[1].text"></label>
-            <div class="control">
-              <input class="input" type="text" v-model="algs[1].vectorStr" :placeholder="`${algs[1].len} features`">
+          <template v-for="alg in algs">
+            <div class="field">
+              <label class="label" v-text="alg.text"></label>
+              <div class="control has-icons-right">
+                <input class="input" type="text" v-model="alg.vecStr" :placeholder="`${alg.len} features`" @focus="inInput(alg)" @blur="computeVec(alg)">
+                <span class="icon is-small is-right" :class="getInputIconColor(alg)">
+                  <i class="fa" :class="getInputIconType(alg)"></i>
+                </span>
+              </div>
             </div>
-          </div>
-
-          <div class="field">
-            <label class="label" v-text="algs[2].text"></label>
-            <div class="control">
-              <input class="input" type="text" v-model="algs[2].vectorStr" :placeholder="`${algs[2].len} features`">
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label" v-text="algs[3].text"></label>
-            <div class="control">
-              <input class="input" type="text" v-model="algs[3].vectorStr" :placeholder="`${algs[3].len} features`">
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label" v-text="algs[4].text"></label>
-            <div class="control">
-              <input class="input" type="text" v-model="algs[4].vectorStr" :placeholder="`${algs[4].len} features`">
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label" v-text="algs[5].text"></label>
-            <div class="control">
-              <input class="input" type="text" v-model="algs[5].vectorStr" :placeholder="`${algs[5].len} features`">
-            </div>
-          </div>
+          </template>
 
           <div class="field">
             <div class="control">
-              <button class="button is-link">Submit</button>
+              <button class="button is-link" :disabled="!isFormSubmissible">Submit</button>
             </div>
           </div>
+
         </form>
       </div>
 
@@ -82,35 +54,15 @@
 
       <div class="field">
         <label class="label">Algorithms</label>
-        <label class="checkbox">
-          <input type="checkbox" :value="algs[0].value" v-model="algsSelected">
-          {{ algs[0].text }}
-        </label>
 
-        <label class="checkbox">
-          <input type="checkbox" :value="algs[1].value" v-model="algsSelected">
-          {{ algs[1].text }}
-        </label>
-
-        <label class="checkbox">
-          <input type="checkbox" :value="algs[2].value" v-model="algsSelected">
-          {{ algs[2].text }}
-        </label>
-
-        <label class="checkbox">
-          <input type="checkbox" :value="algs[3].value" v-model="algsSelected">
-          {{ algs[3].text }}
-        </label>
-
-        <label class="checkbox">
-          <input type="checkbox" :value="algs[4].value" v-model="algsSelected">
-          {{ algs[4].text }}
-        </label>
-
-        <label class="checkbox">
-          <input type="checkbox" :value="algs[5].value" v-model="algsSelected">
-          {{ algs[5].text }}
-        </label>
+        <template v-for="alg in algs">
+          <label class="checkbox">
+            <div class="control">
+              <input type="checkbox" :value="alg.value" v-model="algsSelected">
+              {{ alg.text }}
+            </div>
+          </label>
+        </template>
       </div>
 
     </div>
@@ -145,7 +97,9 @@ export default {
   },
   data() {
     return {
-      isFormHidden: true,
+      isFormVisible: false,
+      isImageModalVisible: false,
+      vecs: {},
       metricSelected: 'euclidean',
       metrics: [{
           text: 'Euclidean distance',
@@ -165,89 +119,118 @@ export default {
           text: 'GIST',
           value: 'gist',
           len: 512,
-          vectorStr: '',
+          vecStr: '',
+          vec: [],
+          isInInput: false,
         },
         {
           text: 'HSV Histogram',
           value: 'hsvHist',
           len: 343,
-          vectorStr: '',
+          vecStr: '',
+          vec: [],
+          isInInput: false,
         },
         {
           text: 'HSV Histogram Layout',
           value: 'hsvHistLayout',
           len: 375,
-          vectorStr: '',
+          vecStr: '',
+          vec: [],
+          isInInput: false,
         },
         {
           text: 'RGB Histogram',
           value: 'rgbHist',
           len: 343,
-          vectorStr: '',
+          vecStr: '',
+          vec: [],
+          isInInput: false,
         },
         {
           text: 'SFTA',
           value: 'sfta',
           len: 42,
-          vectorStr: '',
+          vecStr: '',
+          vec: [],
+          isInInput: false,
         },
         {
           text: 'SIFT',
           value: 'sift',
           len: 100,
-          vectorStr: '',
+          vecStr: '',
+          vec: [],
+          isInInput: false,
         },
       ],
-      showImageModal: false,
     };
   },
   methods: {
-    onFormAngleClick() {
-      this.isFormHidden = !this.isFormHidden;
+    inInput(algor) {
+      const alg = algor;
+      alg.isInInput = true;
+      alg.vec.splice(0, alg.vec.length);
     },
-    onFormSubmit() {
-      const vecs = {};
-      this.algs.forEach((alg) => {
-        if (alg.vectorStr) {
-          let vectorStrArr = alg.vectorStr.trim().split(',');
+    computeVec(algor) {
+      const alg = algor;
+      alg.isInInput = false;
+      if (alg.vecStr) {
+        let vecStrArr = alg.vecStr.trim().split(',');
 
-          if (vectorStrArr.length === 1) {
-            vectorStrArr = vectorStrArr[0].split(' ');
-          }
+        if (vecStrArr.length === 1) {
+          vecStrArr = vecStrArr[0].split(' ');
+        }
 
-          if (vectorStrArr.length === alg.len) {
-            vecs[alg.value] = vectorStrArr;
-
-            // TODO: Verify object
-
-            // algorithmsSupported.forEach((alg) => {
-            //   const tmpVec = lineArr.splice(0, alg.len);
-            //   let discardVec = false;
-            //   const vec = tmpVec.map((e) => {
-            //     const num = Number(e.trim());
-            //     if (Number.isNaN(num)) {
-            //       discardVec = true;
-            //     }
-            //     return num;
-            //   });
-            //   if (!discardVec) {
-            //     discardImage = false;
-            //   }
-            //   image[alg.name] = discardVec ? [] : vec;
-            // });
-            // image.annotations = lineArr.map(e => e.trim());
-            // if (!discardImage) {
-            //   images.push(Object.assign({}, image));
-            // }
-            // Object.keys(image).forEach((key) => {
-            //   image[key] = null;
-            // });
-            // discardImage = true;
+        if (vecStrArr.length === alg.len) {
+          let discardVec = false;
+          vecStrArr.forEach((e) => {
+            const val = Number(e.trim());
+            if (Number.isNaN(val)) {
+              discardVec = true;
+            }
+            alg.vec.push(val);
+          });
+          if (discardVec) {
+            alg.vec.splice(0, alg.vec.length);
           }
         }
-      });
-
-      if (Object.keys(vecs).length) {
+      }
+    },
+    getInputIconType(alg) {
+      let res = 'fa-pencil';
+      if (alg.vecStr && !alg.isInInput) {
+        if (alg.vec.length) {
+          res = 'fa-check';
+        } else {
+          res = 'fa-times';
+        }
+      }
+      return res;
+    },
+    getInputIconColor(alg) {
+      let res = '';
+      if (alg.vecStr && !alg.isInInput) {
+        if (alg.vec.length) {
+          res = 'has-text-success';
+        } else {
+          res = 'has-text-danger';
+        }
+      }
+      return res;
+    },
+    onFormAngleClick() {
+      this.isFormVisible = !this.isFormVisible;
+    },
+    onFormSubmit() {
+      if (this.isFormSubmissible) {
+        const vecs = {};
+        this.algs.forEach((alg) => {
+          const vec = alg.vec;
+          if (vec.length) {
+            vecs[alg.value] = vec;
+          }
+        });
         Event.$emit('compareImage', {
           metric: this.metricSelected,
           vecs,
@@ -255,9 +238,25 @@ export default {
       }
     },
   },
+  computed: {
+    isFormSubmissible() {
+      let isOneFieldGood = false;
+      let areAllFieldsGood = true;
+      this.algs.forEach((alg) => {
+        if (alg.vecStr) {
+          if (alg.vec.length) {
+            isOneFieldGood = true;
+          } else {
+            areAllFieldsGood = false;
+          }
+        }
+      });
+      return isOneFieldGood && areAllFieldsGood;
+    },
+  },
   created() {
     Event.$on('imageClicked', () => {
-      this.showImageModal = true;
+      this.isImageModalVisible = true;
     });
 
     Event.$on('imageSelected', (filename) => {
@@ -272,7 +271,7 @@ export default {
     });
 
     Event.$on('imageModalClosed', () => {
-      this.showImageModal = false;
+      this.isImageModalVisible = false;
     });
   },
 };
@@ -288,7 +287,15 @@ html {
   background-color: #bccfd2;
 }
 
-.icon {
+.checkbox {
+  margin-right: 1em;
+}
+
+.checkbox:last-child {
+  margin-right: initial;
+}
+
+.icon.has-text-link {
   border: 1px #777 solid;
   margin-bottom: 1em;
 }
