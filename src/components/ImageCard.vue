@@ -14,8 +14,8 @@
     </div>
 
     <div v-if="!waiting" class="card-content">
-      <p v-if="hasDistance"><strong>Distance: {{ Number(init.distance).toFixed(5) }}</strong></p>
-      <p> <span v-for="ann in init.annotations">{{ ann }} </span> </p>
+      <p v-if="hasDistance" :class="{ distance: hasAnnotations }"><strong>Distance: {{ Number(init.distance).toFixed(5) }}</strong></p>
+      <p v-if="hasAnnotations"><span v-for="ann in init.annotations">{{ ann }} </span> </p>
     </div>
   </div>
 </div>
@@ -53,6 +53,10 @@ export default {
     hasDistance() {
       return typeof this.init.distance !== 'undefined';
     },
+    hasAnnotations() {
+      const annots = this.init.annotations;
+      return annots.length ? annots[0] : false; // Hack for annotations: [""]
+    },
   },
 };
 </script>
@@ -65,5 +69,9 @@ export default {
 
 .card-content {
   text-align: center;
+}
+
+.distance {
+  border-bottom: 1px #777 solid;
 }
 </style>
