@@ -110,8 +110,9 @@ router.post('/compare', (req, res, next) => {
       .find({}, projection)
       .exec()
       .then((docs) => {
-        const distancesHeap = new Heap((a, b) => b.distance - a.distance);
+        const distances = {};
         descriptors.forEach((desc) => {
+          distances[desc] = [];
           let sum = 0;
           docs.forEach((docu) => {
             const doc = docu;
@@ -130,18 +131,16 @@ router.post('/compare', (req, res, next) => {
           });
         });
 
-        docs.forEach((doc, docInd) => {
-          const obj = {
-            filename: doc.filename,
-            distance: 0,
-            annotations: doc.annotations,
-          };
+        docs.forEach((doc) => {
           descriptors.forEach((desc) => {
+            const obj = {
+              filename: doc.filename,
+              distance: 0,
+              annotations: doc.annotations,
+            };
             if (!doc[desc].length) {
-              obj.distance += 1;
+              obj.distance += 1000; // TODO: Remove magic number
             }
-          });
-          descriptors.forEach((desc) => {
             let sum = 0;
             let sumX = 0;
             let sumY = 0;
@@ -173,29 +172,62 @@ router.post('/compare', (req, res, next) => {
             });
 
             if (metric === 'manhattan') {
-              // obj.distance += sum;
-              obj.distance += sum / descVecsSupportedObj[desc];
+              obj.distance += sum;
             } else if (metric === 'euclidean') {
-              // obj.distance += Math.sqrt(sum);
-              obj.distance += Math.sqrt(sum / descVecsSupportedObj[desc]);
+              obj.distance += Math.sqrt(sum);
             } else if (metric === 'histIntersection') {
               obj.distance += (1 / (sum / Math.min(sumX, sumY))) - 1;
             } else if (metric === 'matusita') {
               obj.distance += Math.sqrt(sum);
-              // obj.distance += Math.sqrt(sum / descVecsSupportedObj[desc]);
             } else if (metric === 'divergence') {
               obj.distance += sum;
             }
+
+            distances[desc].push(obj);
           });
-          if (docInd < numNeighbors) {
-            distancesHeap.push(obj);
-          } else {
-            distancesHeap.pushpop(obj);
-          }
+        });
+        descriptors.forEach((desc) => {
+          distances[desc].sort((a, b) => a.distance - b.distance);
         });
 
-        const results = [...Array(distancesHeap.size()).keys()]
-          .map(() => distancesHeap.pop()).reverse();
+        const descArrLength = descriptors.length;
+
+        if (descArrLength > 1) {
+          const finalDist = [];
+
+          const imagesObj = {};
+          descriptors.forEach((desc) => {
+            distances[desc].forEach(({
+              filename,
+              annotations,
+            }, objInd) => {
+              if (!imagesObj[filename]) {
+                const obj = {
+                  distance: objInd / descArrLength,
+                  annotations,
+                };
+                imagesObj[filename] = obj;
+              } else {
+                imagesObj[filename].distance += objInd / descArrLength;
+              }
+            });
+          });
+
+          Object.keys(imagesObj).forEach((fname) => {
+            const obj = {
+              filename: fname,
+              distance: imagesObj[fname].distance,
+              annotations: imagesObj[fname].annotations,
+            };
+            finalDist.push(obj);
+          });
+
+
+          finalDist.sort((a, b) => a.distance - b.distance);
+          const results = finalDist.slice(0, numNeighbors);
+          return res.json(results);
+        }
+        const results = distances[descriptors[0]].slice(0, numNeighbors);
         res.json(results);
       })
       .catch(err => next(err));
