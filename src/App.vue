@@ -124,9 +124,24 @@ export default {
       ],
       descsSelected: ['sift'],
       descs: [{
+          text: 'SIFT',
+          value: 'sift',
+          len: 100,
+          vecStr: '',
+          vec: [],
+          isInInput: false,
+        }, {
           text: 'GIST',
           value: 'gist',
           len: 512,
+          vecStr: '',
+          vec: [],
+          isInInput: false,
+        },
+        {
+          text: 'RGB Histogram',
+          value: 'rgbHist',
+          len: 343,
           vecStr: '',
           vec: [],
           isInInput: false,
@@ -148,25 +163,9 @@ export default {
           isInInput: false,
         },
         {
-          text: 'RGB Histogram',
-          value: 'rgbHist',
-          len: 343,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-        {
           text: 'SFTA',
           value: 'sfta',
           len: 42,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-        {
-          text: 'SIFT',
-          value: 'sift',
-          len: 100,
           vecStr: '',
           vec: [],
           isInInput: false,
@@ -272,7 +271,7 @@ export default {
 
     Event.$on('imageSelected', (filename) => {
       if (!this.descsSelected.length) {
-        this.descsSelected.push(this.descs[5].value);
+        this.descsSelected.push('sift');
       }
       Event.$emit('compareImageFromDB', {
         filename,
