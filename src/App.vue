@@ -106,15 +106,23 @@ export default {
           value: 'euclidean',
         },
         {
+          text: 'Histogram intersection',
+          value: 'histIntersection',
+        },
+        {
           text: 'Manhattan distance',
           value: 'manhattan',
         },
-        {
-          text: 'Matusita distance',
-          value: 'matusita',
-        },
+        // {
+        //   text: 'Matusita distance',
+        //   value: 'matusita',
+        // },
+        // {
+        //   text: 'Divergence',
+        //   value: 'divergence',
+        // },
       ],
-      descsSelected: ['gist'],
+      descsSelected: ['sift'],
       descs: [{
           text: 'GIST',
           value: 'gist',
@@ -264,7 +272,7 @@ export default {
 
     Event.$on('imageSelected', (filename) => {
       if (!this.descsSelected.length) {
-        this.descsSelected.push(this.descs[0].value);
+        this.descsSelected.push(this.descs[5].value);
       }
       Event.$emit('compareImageFromDB', {
         filename,

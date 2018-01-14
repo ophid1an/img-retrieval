@@ -63,49 +63,14 @@ router.post('/compare', (req, res, next) => {
   const filename = req.body.filename;
   const metric = req.body.metric;
   const vecs = req.body.vecs;
-  const metrics = {
-    manhattan: {
-      addToSum(x1, x2, range) {
-        if (x1 !== x2) {
-          return Math.abs(x1 - x2) / range; // scale to [0,1]
-        }
-        return 0;
-      },
-      transformSum(sum) {
-        return sum;
-      },
-    },
-    euclidean: {
-      addToSum(x1, x2, range) {
-        if (x1 !== x2) {
-          return ((x1 - x2) / range) ** 2; // scale to [0,1]
-        }
-        return 0;
-      },
-      transformSum(sum) {
-        return Math.sqrt(sum);
-      },
-    },
-    matusita: {
-      addToSum(x1, x2, range, min) {
-        if (x1 !== x2) {
-          return (Math.sqrt((x1 - min) / range) -
-            Math.sqrt((x2 - min) / range)) ** 2; // scale to [0,1]
-        }
-        return 0;
-      },
-      transformSum(sum) {
-        return Math.sqrt(sum);
-      },
-    },
-  };
+  const metrics = ['manhattan', 'euclidean', 'matusita', 'histIntersection', 'divergence'];
   const descVecsSupportedObj = {};
   const badInput = () => res.status(400).json({
     err: 'Bad input',
   });
   const isImgInDB = (filename && typeof filename === 'string');
 
-  if (!metric || typeof metric !== 'string' || !metrics[metric]) {
+  if (!metric || typeof metric !== 'string' || metrics.indexOf(metric) === -1) {
     return badInput();
   }
 
@@ -147,8 +112,12 @@ router.post('/compare', (req, res, next) => {
       .then((docs) => {
         const distancesHeap = new Heap((a, b) => b.distance - a.distance);
         descriptors.forEach((desc) => {
-          docs.forEach((doc) => {
+          let sum = 0;
+          docs.forEach((docu) => {
+            const doc = docu;
+            doc.sums = {};
             doc[desc].forEach((val, valInd) => {
+              sum += val;
               const range = vecs[desc].ranges[valInd];
               if (val < range[0]) {
                 range[0] = val;
@@ -157,6 +126,7 @@ router.post('/compare', (req, res, next) => {
                 range[1] = val;
               }
             });
+            doc.sums[desc] = sum;
           });
         });
 
@@ -173,14 +143,49 @@ router.post('/compare', (req, res, next) => {
           });
           descriptors.forEach((desc) => {
             let sum = 0;
+            let sumX = 0;
+            let sumY = 0;
             doc[desc].forEach((val, valInd) => {
               const r = vecs[desc].ranges[valInd];
               const min = r[0];
               const range = r[1] - min;
-              sum += metrics[metric].addToSum(val, vecs[desc].vec[valInd], range, min);
+              if (range !== 0) {
+                const x = (vecs[desc].vec[valInd] - min) / range; // scale to [0,1]
+                const y = (val - min) / range; // scale to [0,1]
+                if (metric === 'manhattan') {
+                  sum += Math.abs(x - y);
+                } else if (metric === 'euclidean') {
+                  sum += (x - y) ** 2;
+                } else if (metric === 'histIntersection') {
+                  sumX += x;
+                  sumY += y;
+                  sum += Math.min(x, y);
+                } else if (metric === 'matusita') {
+                  const px = vecs[desc].vec[valInd] / vecs[desc].sum;
+                  const py = val / doc.sums[desc];
+                  sum += (Math.sqrt(px) - Math.sqrt(py)) ** 2;
+                } else if (metric === 'divergence') {
+                  const px = vecs[desc].vec[valInd] / vecs[desc].sum;
+                  const py = val / doc.sums[desc];
+                  sum += (px - py) * Math.log(px / py);
+                }
+              }
             });
 
-            obj.distance += metrics[metric].transformSum(sum / descVecsSupportedObj[desc]);
+            if (metric === 'manhattan') {
+              // obj.distance += sum;
+              obj.distance += sum / descVecsSupportedObj[desc];
+            } else if (metric === 'euclidean') {
+              // obj.distance += Math.sqrt(sum);
+              obj.distance += Math.sqrt(sum / descVecsSupportedObj[desc]);
+            } else if (metric === 'histIntersection') {
+              obj.distance += (1 / (sum / Math.min(sumX, sumY))) - 1;
+            } else if (metric === 'matusita') {
+              obj.distance += Math.sqrt(sum);
+              // obj.distance += Math.sqrt(sum / descVecsSupportedObj[desc]);
+            } else if (metric === 'divergence') {
+              obj.distance += sum;
+            }
           });
           if (docInd < numNeighbors) {
             distancesHeap.push(obj);
@@ -213,12 +218,15 @@ router.post('/compare', (req, res, next) => {
             descriptors.splice(descriptors.indexOf(desc), 1);
           } else {
             const vecRanges = [];
+            let vecSum = 0;
             docs[0][desc].forEach((val) => {
               vecRanges.push([val, val]);
+              vecSum += val;
             });
             vecs[desc] = {
               vec: docs[0][desc],
               ranges: [],
+              sum: vecSum,
             };
             vecs[desc].ranges = vecRanges;
           }
@@ -238,13 +246,16 @@ router.post('/compare', (req, res, next) => {
       }
 
       const vecRanges = [];
+      let vecSum = 0;
       let discardVec = false;
       const vec = vecs[desc].map((e) => {
         const val = Number(e);
         if (Number.isNaN(val)) {
           discardVec = true;
+        } else {
+          vecRanges.push([val, val]);
+          vecSum += val;
         }
-        vecRanges.push([val, val]);
         return val;
       });
 
@@ -256,6 +267,7 @@ router.post('/compare', (req, res, next) => {
       vecs[desc] = {
         vec,
         ranges: [],
+        sum: vecSum,
       };
       vecs[desc].ranges = vecRanges;
     }
