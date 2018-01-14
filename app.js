@@ -16,6 +16,16 @@ var api = require('./routes/api');
 
 var app = express();
 
+// Heroku redirect from http to https
+app.configure('development', => {
+  app.use((req, res, next) => {
+    if (req.header 'x-forwarded-proto' !== 'https')
+      res.redirect(`https://${req.header('host')}${req.url}`);
+    else
+      next();
+  })
+})
+
 app.use(compression());
 app.use(helmet());
 
@@ -37,14 +47,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'dist')));
-
-// Heroku redirect from http to https
-app.use(function (req, res, next) {
-    if (req.headers['x-forwarded-proto'] !== 'https' && (process.env.NODE_ENV === 'production')) {
-        return res.redirect(`https://${req.hostname}${req.url}`);
-    }
-    return next();
-});
 
 app.use('/api', api);
 
