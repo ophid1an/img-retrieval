@@ -36,7 +36,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'dist')));
 
 // Heroku redirect from http to https
 app.use(function (req, res, next) {
@@ -45,6 +44,8 @@ app.use(function (req, res, next) {
     }
     return next();
 });
+
+app.use(express.static(path.join(__dirname, 'dist')));
 
 app.use('/api', api);
 
