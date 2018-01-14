@@ -228,11 +228,13 @@ export default {
         this.algs.forEach((algor) => {
           const alg = algor;
           const vec = alg.vec;
-          if (vec.length) {
+          if (alg.vecStr) {
             vecs[alg.value] = vec;
           }
           alg.vecStr = '';
         });
+        console.log(vecs)
+
         Event.$emit('compareImage', {
           metric: this.metricSelected,
           vecs,
