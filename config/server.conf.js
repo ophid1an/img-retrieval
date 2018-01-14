@@ -1,6 +1,6 @@
 exports.dbURI = process.env.MONGODB_URI || 'mongodb://localhost/mm-dbs-project'
 
-exports.algorithmsSupported = [{
+exports.descVecsSupported = [{
     name: 'gist',
     len: 512,
   },

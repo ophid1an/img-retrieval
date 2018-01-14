@@ -42,7 +42,7 @@ export default {
     Event.$on('compareImageFromDB', ({
       filename,
       metric,
-      algsSelected,
+      descsSelected,
     }) => {
       const vecs = {};
       this.images.forEach((img) => {
@@ -51,8 +51,8 @@ export default {
         image.annotations = [];
         image.distance = undefined;
       });
-      algsSelected.forEach((alg) => {
-        vecs[alg] = [];
+      descsSelected.forEach((desc) => {
+        vecs[desc] = [];
       });
       axios.post('/api/compare', {
           filename,

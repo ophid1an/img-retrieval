@@ -20,13 +20,13 @@
 
         <form :class="{ 'is-hidden': !isFormVisible}" @submit.prevent="onFormSubmit">
 
-          <template v-for="alg in algs">
+          <template v-for="desc in descs">
             <div class="field">
-              <label class="label" v-text="alg.text"></label>
+              <label class="label" v-text="desc.text"></label>
               <div class="control has-icons-right">
-                <input class="input" type="text" v-model="alg.vecStr" :placeholder="`${alg.len} features`" @focus="inInput(alg)" @blur="computeVec(alg)">
-                <span class="icon is-small is-right" :class="getInputIconColor(alg)">
-                  <i class="fa" :class="getInputIconType(alg)"></i>
+                <input class="input" type="text" v-model="desc.vecStr" :placeholder="`${desc.len} features`" @focus="inInput(desc)" @blur="computeVec(desc)">
+                <span class="icon is-small is-right" :class="getInputIconColor(desc)">
+                  <i class="fa" :class="getInputIconType(desc)"></i>
                 </span>
               </div>
             </div>
@@ -53,13 +53,13 @@
       </div>
 
       <div class="field">
-        <label class="label">Algorithms</label>
+        <label class="label">Descriptors</label>
 
-        <template v-for="alg in algs">
+        <template v-for="desc in descs">
           <label class="checkbox">
             <div class="control">
-              <input type="checkbox" :value="alg.value" v-model="algsSelected">
-              {{ alg.text }}
+              <input type="checkbox" :value="desc.value" v-model="descsSelected">
+              {{ desc.text }}
             </div>
           </label>
         </template>
@@ -114,8 +114,8 @@ export default {
           value: 'matusita',
         },
       ],
-      algsSelected: ['gist'],
-      algs: [{
+      descsSelected: ['gist'],
+      descs: [{
           text: 'GIST',
           value: 'gist',
           len: 512,
@@ -167,40 +167,40 @@ export default {
     };
   },
   methods: {
-    inInput(algor) {
-      const alg = algor;
-      alg.isInInput = true;
-      alg.vec.splice(0, alg.vec.length);
+    inInput(descrip) {
+      const desc = descrip;
+      desc.isInInput = true;
+      desc.vec.splice(0, desc.vec.length);
     },
-    computeVec(algor) {
-      const alg = algor;
-      alg.isInInput = false;
-      if (alg.vecStr) {
-        let vecStrArr = alg.vecStr.trim().split(',');
+    computeVec(descrip) {
+      const desc = descrip;
+      desc.isInInput = false;
+      if (desc.vecStr) {
+        let vecStrArr = desc.vecStr.trim().split(',');
 
         if (vecStrArr.length === 1) {
           vecStrArr = vecStrArr[0].split(' ');
         }
 
-        if (vecStrArr.length === alg.len) {
+        if (vecStrArr.length === desc.len) {
           let discardVec = false;
           vecStrArr.forEach((e) => {
             const val = Number(e.trim());
             if (Number.isNaN(val)) {
               discardVec = true;
             }
-            alg.vec.push(val);
+            desc.vec.push(val);
           });
           if (discardVec) {
-            alg.vec.splice(0, alg.vec.length);
+            desc.vec.splice(0, desc.vec.length);
           }
         }
       }
     },
-    getInputIconType(alg) {
+    getInputIconType(desc) {
       let res = 'fa-pencil';
-      if (alg.vecStr && !alg.isInInput) {
-        if (alg.vec.length) {
+      if (desc.vecStr && !desc.isInInput) {
+        if (desc.vec.length) {
           res = 'fa-check';
         } else {
           res = 'fa-times';
@@ -208,10 +208,10 @@ export default {
       }
       return res;
     },
-    getInputIconColor(alg) {
+    getInputIconColor(desc) {
       let res = '';
-      if (alg.vecStr && !alg.isInInput) {
-        if (alg.vec.length) {
+      if (desc.vecStr && !desc.isInInput) {
+        if (desc.vec.length) {
           res = 'has-text-success';
         } else {
           res = 'has-text-danger';
@@ -225,15 +225,14 @@ export default {
     onFormSubmit() {
       if (this.isFormSubmissible) {
         const vecs = {};
-        this.algs.forEach((algor) => {
-          const alg = algor;
-          const vec = alg.vec;
-          if (alg.vecStr) {
-            vecs[alg.value] = vec;
+        this.descs.forEach((descrip) => {
+          const desc = descrip;
+          const vec = desc.vec;
+          if (desc.vecStr) {
+            vecs[desc.value] = vec;
           }
-          alg.vecStr = '';
+          desc.vecStr = '';
         });
-        console.log(vecs)
 
         Event.$emit('compareImage', {
           metric: this.metricSelected,
@@ -246,9 +245,9 @@ export default {
     isFormSubmissible() {
       let isOneFieldGood = false;
       let areAllFieldsGood = true;
-      this.algs.forEach((alg) => {
-        if (alg.vecStr) {
-          if (alg.vec.length) {
+      this.descs.forEach((desc) => {
+        if (desc.vecStr) {
+          if (desc.vec.length) {
             isOneFieldGood = true;
           } else {
             areAllFieldsGood = false;
@@ -264,13 +263,13 @@ export default {
     });
 
     Event.$on('imageSelected', (filename) => {
-      if (!this.algsSelected.length) {
-        this.algsSelected.push(this.algs[0].value);
+      if (!this.descsSelected.length) {
+        this.descsSelected.push(this.descs[0].value);
       }
       Event.$emit('compareImageFromDB', {
         filename,
         metric: this.metricSelected,
-        algsSelected: this.algsSelected,
+        descsSelected: this.descsSelected,
       });
     });
 

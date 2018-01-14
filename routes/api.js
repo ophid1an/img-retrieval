@@ -1,7 +1,7 @@
 const express = require('express');
 const Image = require('../models/image');
 const Heap = require('heap');
-const algorithmsSupported = require('../config/server.conf').algorithmsSupported;
+const descVecsSupported = require('../config/server.conf').descVecsSupported;
 const numNeighbors = require('../config/server.conf').numNeighbors;
 
 const router = express.Router();
@@ -99,7 +99,7 @@ router.post('/compare', (req, res, next) => {
       },
     },
   };
-  const algorithmsSupportedObj = {};
+  const descVecsSupportedObj = {};
   const badInput = () => res.status(400).json({
     err: 'Bad input',
   });
@@ -109,26 +109,26 @@ router.post('/compare', (req, res, next) => {
     return badInput();
   }
 
-  algorithmsSupported.forEach((e) => {
-    algorithmsSupportedObj[e.name] = e.len;
+  descVecsSupported.forEach((e) => {
+    descVecsSupportedObj[e.name] = e.len;
   });
 
   if (!vecs || typeof vecs !== 'object') {
     return badInput();
   }
 
-  const algs = Object.keys(vecs);
-  if (algs.length < 1 || algs.length > 6) {
+  const descriptors = Object.keys(vecs);
+  if (descriptors.length < 1 || descriptors.length > 6) {
     return badInput();
   }
-  for (let i = 0, len = algs.length; i < len; i += 1) {
-    if (!algorithmsSupportedObj[algs[i]]) {
+  for (let i = 0, len = descriptors.length; i < len; i += 1) {
+    if (!descVecsSupportedObj[descriptors[i]]) {
       return badInput();
     }
   }
 
   const compareImages = () => {
-    if (!algs.length) {
+    if (!descriptors.length) {
       return res.json([]);
     }
 
@@ -137,8 +137,8 @@ router.post('/compare', (req, res, next) => {
       annotations: 1,
     };
 
-    algs.forEach((alg) => {
-      projection[alg] = 1;
+    descriptors.forEach((desc) => {
+      projection[desc] = 1;
     });
 
     Image
@@ -146,10 +146,10 @@ router.post('/compare', (req, res, next) => {
       .exec()
       .then((docs) => {
         const distancesHeap = new Heap((a, b) => b.distance - a.distance);
-        algs.forEach((alg) => {
+        descriptors.forEach((desc) => {
           docs.forEach((doc) => {
-            doc[alg].forEach((val, valInd) => {
-              const range = vecs[alg].ranges[valInd];
+            doc[desc].forEach((val, valInd) => {
+              const range = vecs[desc].ranges[valInd];
               if (val < range[0]) {
                 range[0] = val;
               }
@@ -163,24 +163,24 @@ router.post('/compare', (req, res, next) => {
         docs.forEach((doc, docInd) => {
           const obj = {
             filename: doc.filename,
-            distance: algs.length,
+            distance: 0,
             annotations: doc.annotations,
           };
-          algs.forEach((alg) => {
-            if (doc[alg].length) {
-              obj.distance -= 1;
+          descriptors.forEach((desc) => {
+            if (!doc[desc].length) {
+              obj.distance += 1;
             }
           });
-          algs.forEach((alg) => {
+          descriptors.forEach((desc) => {
             let sum = 0;
-            doc[alg].forEach((val, valInd) => {
-              const r = vecs[alg].ranges[valInd];
+            doc[desc].forEach((val, valInd) => {
+              const r = vecs[desc].ranges[valInd];
               const min = r[0];
               const range = r[1] - min;
-              sum += metrics[metric].addToSum(val, vecs[alg].vec[valInd], range, min);
+              sum += metrics[metric].addToSum(val, vecs[desc].vec[valInd], range, min);
             });
 
-            obj.distance += metrics[metric].transformSum(sum / algorithmsSupportedObj[alg]);
+            obj.distance += metrics[metric].transformSum(sum / descVecsSupportedObj[desc]);
           });
           if (docInd < numNeighbors) {
             distancesHeap.push(obj);
@@ -198,8 +198,8 @@ router.post('/compare', (req, res, next) => {
 
   if (isImgInDB) {
     const projection = {};
-    algs.forEach((alg) => {
-      projection[alg] = 1;
+    descriptors.forEach((desc) => {
+      projection[desc] = 1;
     });
     Image
       .find({
@@ -207,20 +207,20 @@ router.post('/compare', (req, res, next) => {
       }, projection)
       .exec()
       .then((docs) => {
-        const tmpAlgs = algs.map(x => x);
-        tmpAlgs.forEach((alg) => {
-          if (!docs[0][alg].length) {
-            algs.splice(algs.indexOf(alg), 1);
+        const tmpDescs = descriptors.map(x => x);
+        tmpDescs.forEach((desc) => {
+          if (!docs[0][desc].length) {
+            descriptors.splice(descriptors.indexOf(desc), 1);
           } else {
             const vecRanges = [];
-            docs[0][alg].forEach((val) => {
+            docs[0][desc].forEach((val) => {
               vecRanges.push([val, val]);
             });
-            vecs[alg] = {
-              vec: docs[0][alg],
+            vecs[desc] = {
+              vec: docs[0][desc],
               ranges: [],
             };
-            vecs[alg].ranges = vecRanges;
+            vecs[desc].ranges = vecRanges;
           }
         });
 
@@ -228,18 +228,18 @@ router.post('/compare', (req, res, next) => {
       })
       .catch(err => next(err));
   } else {
-    const tmpAlgs = algs.map(x => x);
-    for (let i = 0, len = tmpAlgs.length; i < len; i += 1) {
-      const alg = tmpAlgs[i];
-      if (!Array.isArray(vecs[alg]) ||
-        vecs[alg].length !== algorithmsSupportedObj[alg]) {
-        algs.splice(algs.indexOf(alg), 1);
+    const tmpDescs = descriptors.map(x => x);
+    for (let i = 0, len = tmpDescs.length; i < len; i += 1) {
+      const desc = tmpDescs[i];
+      if (!Array.isArray(vecs[desc]) ||
+        vecs[desc].length !== descVecsSupportedObj[desc]) {
+        descriptors.splice(descriptors.indexOf(desc), 1);
         continue;
       }
 
       const vecRanges = [];
       let discardVec = false;
-      const vec = vecs[alg].map((e) => {
+      const vec = vecs[desc].map((e) => {
         const val = Number(e);
         if (Number.isNaN(val)) {
           discardVec = true;
@@ -248,16 +248,16 @@ router.post('/compare', (req, res, next) => {
         return val;
       });
 
-      if (discardVec || vec.length !== algorithmsSupportedObj[alg]) {
-        algs.splice(algs.indexOf(alg), 1);
+      if (discardVec || vec.length !== descVecsSupportedObj[desc]) {
+        descriptors.splice(descriptors.indexOf(desc), 1);
         continue;
       }
 
-      vecs[alg] = {
+      vecs[desc] = {
         vec,
         ranges: [],
       };
-      vecs[alg].ranges = vecRanges;
+      vecs[desc].ranges = vecRanges;
     }
     return compareImages();
   }

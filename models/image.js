@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const algorithmsSupported = require('../config/server.conf').algorithmsSupported;
+const descVecsSupported = require('../config/server.conf').descVecsSupported;
 
 const Schema = mongoose.Schema;
 const imageObj = {
@@ -11,7 +11,7 @@ const imageObj = {
   annotations: [String],
 };
 
-algorithmsSupported.forEach((e) => {
+descVecsSupported.forEach((e) => {
   imageObj[e.name] = {
     type: [Number],
   };
