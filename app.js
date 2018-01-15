@@ -14,6 +14,8 @@ const dbURI = require('./config/server.conf').dbURI;
 
 var api = require('./routes/api');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 var app = express();
 
 app.use(compression());
@@ -34,30 +36,36 @@ app.set('view engine', 'hbs');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 
 // Heroku redirect from http to https
 app.use(function (req, res, next) {
-    if (req.headers['x-forwarded-proto'] !== 'https' && (process.env.NODE_ENV === 'production')) {
-        return res.redirect(`https://${req.hostname}${req.url}`);
-    }
-    return next();
+  if (req.headers['x-forwarded-proto'] !== 'https' && isProduction) {
+    return res.redirect(`https://${req.hostname}${req.url}`);
+  }
+  return next();
 });
 
-app.use(express.static(path.join(__dirname, 'dist')));
+if (isProduction) {
+  app.use(express.static(path.join(__dirname, 'dist')));
+} else {
+  app.use(express.static(path.join(__dirname, 'dist')));
+}
 
 app.use('/api', api);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
