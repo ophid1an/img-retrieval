@@ -42,6 +42,14 @@
       </div>
 
       <div class="field">
+        <label class="label">Number of results</label>
+        <div class="control">
+          <input class="slider is-fullwidth is-info has-output" v-model="numResults" step="1" min="2" max="50" type="range">
+          <output>{{ numResults }}</output>
+        </div>
+      </div>
+
+      <div class="field">
         <label class="label">Metric</label>
         <div class="control">
           <div class="select">
@@ -100,6 +108,7 @@ export default {
       isFormVisible: false,
       isImageModalVisible: false,
       vecs: {},
+      numResults: 20,
       metricSelected: 'euclidean',
       metrics: [{
           text: 'Euclidean distance',
@@ -244,6 +253,7 @@ export default {
         Event.$emit('compareImage', {
           metric: this.metricSelected,
           vecs,
+          numResults: Number(this.numResults),
         });
       }
     },
@@ -275,6 +285,7 @@ export default {
       }
       Event.$emit('compareImageFromDB', {
         filename,
+        numResults: Number(this.numResults),
         metric: this.metricSelected,
         descsSelected: this.descsSelected,
       });

@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import 'font-awesome/css/font-awesome.min.css';
 import 'bulma/css/bulma.css';
+import 'bulma-slider/bulma-slider.css';
 import App from './App';
 
 Vue.config.productionTip = false;

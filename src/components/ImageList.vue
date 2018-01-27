@@ -28,10 +28,12 @@ export default {
     Event.$on('compareImage', ({
       metric,
       vecs,
+      numResults,
     }) => {
       axios.post('/api/compare', {
           metric,
           vecs,
+          numResults,
         })
         .then((res) => {
           this.images = res.data;
@@ -43,6 +45,7 @@ export default {
       filename,
       metric,
       descsSelected,
+      numResults,
     }) => {
       const vecs = {};
       this.images.forEach((img) => {
@@ -58,6 +61,7 @@ export default {
           filename,
           metric,
           vecs,
+          numResults,
         })
         .then((res) => {
           this.images = res.data;

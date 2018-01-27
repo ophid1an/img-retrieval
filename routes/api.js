@@ -69,9 +69,19 @@ router.post('/compare', (req, res, next) => {
     err: 'Bad input',
   });
   const isImgInDB = (filename && typeof filename === 'string');
+  let numResults = req.body.numResults;
 
   if (!metric || typeof metric !== 'string' || metrics.indexOf(metric) === -1) {
     return badInput();
+  }
+
+  if (!numResults || typeof numResults !== 'number') {
+    numResults = numNeighbors;
+  } else {
+    numResults = Math.floor(numResults);
+    if (numResults < 2 || numResults > 50) {
+      numResults = numNeighbors;
+    }
   }
 
   descVecsSupported.forEach((e) => {
@@ -224,10 +234,10 @@ router.post('/compare', (req, res, next) => {
 
 
           finalDist.sort((a, b) => a.distance - b.distance);
-          const results = finalDist.slice(0, numNeighbors);
+          const results = finalDist.slice(0, numResults);
           return res.json(results);
         }
-        const results = distances[descriptors[0]].slice(0, numNeighbors);
+        const results = distances[descriptors[0]].slice(0, numResults);
         res.json(results);
       })
       .catch(err => next(err));
