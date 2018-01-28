@@ -273,4 +273,8 @@ html {
 .footer {
   background-color: initial;
 }
+
+input[type=range].slider:not([orient="vertical"]).has-output+output {
+  z-index: auto;
+}
 </style>
