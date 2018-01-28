@@ -2,6 +2,7 @@ const express = require('express');
 const Image = require('../models/image');
 const Heap = require('heap');
 const descVecsSupported = require('../config/server.conf').descVecsSupported;
+const metricsSupported = require('../config/server.conf').metricsSupported;
 const numNeighbors = require('../config/server.conf').numNeighbors;
 
 const router = express.Router();
@@ -63,7 +64,7 @@ router.post('/compare', (req, res, next) => {
   const filename = req.body.filename;
   const metric = req.body.metric;
   const vecs = req.body.vecs;
-  const metrics = ['manhattan', 'euclidean', 'matusita', 'histIntersection', 'divergence'];
+  const metrics = metricsSupported.map(m => m.value);
   const descVecsSupportedObj = {};
   const badInput = () => res.status(400).json({
     err: 'Bad input',

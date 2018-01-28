@@ -26,6 +26,28 @@ exports.descVecsSupported = [{
   },
 ];
 
+exports.metricsSupported = [{
+    text: 'Euclidean distance',
+    value: 'euclidean',
+  },
+  {
+    text: 'Histogram intersection',
+    value: 'histIntersection',
+  },
+  {
+    text: 'Manhattan distance',
+    value: 'manhattan',
+  },
+  // {
+  //   text: 'Matusita distance',
+  //   value: 'matusita',
+  // },
+  // {
+  //   text: 'Divergence',
+  //   value: 'divergence',
+  // },
+];
+
 exports.numNeighbors = {
   default: 20,
   min: 2,

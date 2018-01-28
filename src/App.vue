@@ -96,7 +96,7 @@
 <script>
 import ImageList from './components/ImageList';
 import ImageModal from './components/ImageModal';
-import { numNeighbors } from '../config/server.conf';
+import { metricsSupported, numNeighbors } from '../config/server.conf';
 
 export default {
   name: 'app',
@@ -111,27 +111,7 @@ export default {
       vecs: {},
       numResults: numNeighbors,
       metricSelected: 'euclidean',
-      metrics: [{
-          text: 'Euclidean distance',
-          value: 'euclidean',
-        },
-        {
-          text: 'Histogram intersection',
-          value: 'histIntersection',
-        },
-        {
-          text: 'Manhattan distance',
-          value: 'manhattan',
-        },
-        // {
-        //   text: 'Matusita distance',
-        //   value: 'matusita',
-        // },
-        // {
-        //   text: 'Divergence',
-        //   value: 'divergence',
-        // },
-      ],
+      metrics: metricsSupported,
       descsSelected: ['sift'],
       descs: [{
           text: 'SIFT',
