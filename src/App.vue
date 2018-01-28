@@ -44,8 +44,8 @@
       <div class="field">
         <label class="label">Number of results</label>
         <div class="control">
-          <input class="slider is-fullwidth is-info has-output" v-model="numResults" step="1" min="2" max="50" type="range">
-          <output>{{ numResults }}</output>
+          <input class="slider is-fullwidth is-info has-output" v-model="numResults.default" step="1" :min="numResults.min" :max="numResults.max" type="range">
+          <output>{{ numResults.default }}</output>
         </div>
       </div>
 
@@ -96,6 +96,7 @@
 <script>
 import ImageList from './components/ImageList';
 import ImageModal from './components/ImageModal';
+import { numNeighbors } from '../config/server.conf';
 
 export default {
   name: 'app',
@@ -108,7 +109,7 @@ export default {
       isFormVisible: false,
       isImageModalVisible: false,
       vecs: {},
-      numResults: 20,
+      numResults: numNeighbors,
       metricSelected: 'euclidean',
       metrics: [{
           text: 'Euclidean distance',
@@ -253,7 +254,7 @@ export default {
         Event.$emit('compareImage', {
           metric: this.metricSelected,
           vecs,
-          numResults: Number(this.numResults),
+          numResults: Number(this.numResults.default),
         });
       }
     },
@@ -285,7 +286,7 @@ export default {
       }
       Event.$emit('compareImageFromDB', {
         filename,
-        numResults: Number(this.numResults),
+        numResults: Number(this.numResults.default),
         metric: this.metricSelected,
         descsSelected: this.descsSelected,
       });

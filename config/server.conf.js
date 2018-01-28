@@ -26,4 +26,8 @@ exports.descVecsSupported = [{
   },
 ];
 
-exports.numNeighbors = 20;
+exports.numNeighbors = {
+  default: 20,
+  min: 2,
+  max: 50,
+};

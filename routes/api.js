@@ -45,7 +45,7 @@ router.get('/find-full/:filename', (req, res, next) => {
 
 
 router.get('/random', (req, res, next) => {
-  const numberOfImages = numNeighbors;
+  const numberOfImages = numNeighbors.default;
   return Image
     .aggregate()
     .sample(numberOfImages)
@@ -76,11 +76,11 @@ router.post('/compare', (req, res, next) => {
   }
 
   if (!numResults || typeof numResults !== 'number') {
-    numResults = numNeighbors;
+    numResults = numNeighbors.default;
   } else {
     numResults = Math.floor(numResults);
-    if (numResults < 2 || numResults > 50) {
-      numResults = numNeighbors;
+    if (numResults < numNeighbors.min || numResults > numNeighbors.max) {
+      numResults = numNeighbors.default;
     }
   }
 
