@@ -1,27 +1,33 @@
 exports.dbURI = process.env.MONGODB_URI || 'mongodb://localhost/mm-dbs-project'
 
 exports.descVecsSupported = [{
-    name: 'gist',
+    value: 'gist',
+    text: 'Gist',
     len: 512,
   },
   {
-    name: 'hsvHist',
+    value: 'hsvHist',
+    text: 'HSV Histogram',
     len: 343,
   },
   {
-    name: 'hsvHistLayout',
+    value: 'hsvHistLayout',
+    text: 'HSV Histogram Layout',
     len: 375,
   },
   {
-    name: 'rgbHist',
+    value: 'rgbHist',
+    text: 'RGB Histogram',
     len: 343,
   },
   {
-    name: 'sfta',
+    value: 'sfta',
+    text: 'SFTA',
     len: 42,
   },
   {
-    name: 'sift',
+    value: 'sift',
+    text: 'SIFT',
     len: 100,
   },
 ];

@@ -53,7 +53,7 @@ rl.on('line', (line) => {
       if (!discardVec) {
         discardImage = false;
       }
-      image[desc.name] = discardVec ? [] : vec;
+      image[desc.value] = discardVec ? [] : vec;
     });
     image.annotations = lineArr;
     if (!discardImage) {

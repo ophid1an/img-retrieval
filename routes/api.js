@@ -86,7 +86,7 @@ router.post('/compare', (req, res, next) => {
   }
 
   descVecsSupported.forEach((e) => {
-    descVecsSupportedObj[e.name] = e.len;
+    descVecsSupportedObj[e.value] = e.len;
   });
 
   if (!vecs || typeof vecs !== 'object') {

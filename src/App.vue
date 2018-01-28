@@ -96,7 +96,11 @@
 <script>
 import ImageList from './components/ImageList';
 import ImageModal from './components/ImageModal';
-import { metricsSupported, numNeighbors } from '../config/server.conf';
+import {
+  descVecsSupported,
+  metricsSupported,
+  numNeighbors,
+} from '../config/server.conf';
 
 export default {
   name: 'app',
@@ -113,54 +117,13 @@ export default {
       metricSelected: 'euclidean',
       metrics: metricsSupported,
       descsSelected: ['sift'],
-      descs: [{
-          text: 'SIFT',
-          value: 'sift',
-          len: 100,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        }, {
-          text: 'GIST',
-          value: 'gist',
-          len: 512,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-        {
-          text: 'SFTA',
-          value: 'sfta',
-          len: 42,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-        {
-          text: 'RGB Histogram',
-          value: 'rgbHist',
-          len: 343,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-        {
-          text: 'HSV Histogram',
-          value: 'hsvHist',
-          len: 343,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-        {
-          text: 'HSV Histogram Layout',
-          value: 'hsvHistLayout',
-          len: 375,
-          vecStr: '',
-          vec: [],
-          isInInput: false,
-        },
-      ],
+      descs: descVecsSupported.map((desc) => {
+        const obj = desc;
+        obj.vecStr = '';
+        obj.vec = [];
+        obj.isInInput = false;
+        return obj;
+      }),
     };
   },
   methods: {
@@ -174,9 +137,9 @@ export default {
       desc.isInInput = false;
       if (desc.vecStr) {
         const vecStrArr = desc.vecStr.replace(/,/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .split(' ');
+          .replace(/\s+/g, ' ')
+          .trim()
+          .split(' ');
 
         if (vecStrArr.length === desc.len) {
           let discardVec = false;

@@ -12,7 +12,7 @@ const imageObj = {
 };
 
 descVecsSupported.forEach((e) => {
-  imageObj[e.name] = {
+  imageObj[e.value] = {
     type: [Number],
   };
 });
