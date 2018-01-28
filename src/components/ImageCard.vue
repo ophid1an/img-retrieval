@@ -54,8 +54,7 @@ export default {
       return typeof this.init.distance !== 'undefined';
     },
     hasAnnotations() {
-      const annots = this.init.annotations;
-      return annots.length ? annots[0] : false; // Hack for annotations: [""]
+      return this.init.annotations.length;
     },
   },
 };

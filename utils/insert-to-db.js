@@ -33,15 +33,18 @@ rl.on('line', (line) => {
       return rl.close();
     }
   }
-  const lineArr = line.trim().split(',');
+  const lineArr = line.replace(/,/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ');
 
   if (lineArr.length >= vectorsLen + 1) {
-    image.filename = lineArr.splice(0, 1)[0].trim();
+    image.filename = lineArr.splice(0, 1)[0];
     descVecsSupported.forEach((desc) => {
       const tmpVec = lineArr.splice(0, desc.len);
       let discardVec = false;
       const vec = tmpVec.map((e) => {
-        const num = Number(e.trim());
+        const num = Number(e);
         if (Number.isNaN(num)) {
           discardVec = true;
         }
@@ -52,7 +55,7 @@ rl.on('line', (line) => {
       }
       image[desc.name] = discardVec ? [] : vec;
     });
-    image.annotations = lineArr.map(e => e.trim());
+    image.annotations = lineArr;
     if (!discardImage) {
       images.push(Object.assign({}, image));
     }

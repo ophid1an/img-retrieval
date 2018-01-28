@@ -193,16 +193,15 @@ export default {
       const desc = descrip;
       desc.isInInput = false;
       if (desc.vecStr) {
-        let vecStrArr = desc.vecStr.trim().split(',');
-
-        if (vecStrArr.length === 1) {
-          vecStrArr = vecStrArr[0].split(' ');
-        }
+        const vecStrArr = desc.vecStr.replace(/,/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ');
 
         if (vecStrArr.length === desc.len) {
           let discardVec = false;
           vecStrArr.forEach((e) => {
-            const val = Number(e.trim());
+            const val = Number(e);
             if (Number.isNaN(val)) {
               discardVec = true;
             }
