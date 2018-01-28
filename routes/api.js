@@ -1,6 +1,5 @@
 const express = require('express');
 const Image = require('../models/image');
-const Heap = require('heap');
 const descVecsSupported = require('../config/server.conf').descVecsSupported;
 const metricsSupported = require('../config/server.conf').metricsSupported;
 const numNeighbors = require('../config/server.conf').numNeighbors;
