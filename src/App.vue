@@ -42,6 +42,11 @@
       </div>
 
       <div class="field">
+        <input id="halfDims" type="checkbox" class="switch is-info is-rtl" v-model="halfDims">
+        <label for="halfDims" class="label">Use half dimensions</label>
+      </div>
+
+      <div class="field">
         <label class="label">Number of results</label>
         <div class="control">
           <input class="slider is-fullwidth is-info has-output" v-model="numResults.default" step="1" :min="numResults.min" :max="numResults.max" type="range">
@@ -112,6 +117,7 @@ export default {
     return {
       isFormVisible: false,
       isImageModalVisible: false,
+      halfDims: false,
       vecs: {},
       numResults: numNeighbors,
       metricSelected: 'euclidean',
@@ -231,6 +237,7 @@ export default {
         numResults: Number(this.numResults.default),
         metric: this.metricSelected,
         descsSelected: this.descsSelected,
+        halfDims: this.halfDims,
       });
     });
 
