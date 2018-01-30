@@ -169,14 +169,6 @@ router.post('/compare', (req, res, next) => {
                   sumX += x;
                   sumY += y;
                   sum += Math.min(x, y);
-                } else if (metric === 'matusita') {
-                  const px = vecs[desc].vec[valInd] / vecs[desc].sum;
-                  const py = val / doc.sums[desc];
-                  sum += (Math.sqrt(px) - Math.sqrt(py)) ** 2;
-                } else if (metric === 'divergence') {
-                  const px = vecs[desc].vec[valInd] / vecs[desc].sum;
-                  const py = val / doc.sums[desc];
-                  sum += (px - py) * Math.log(px / py);
                 }
               }
             });
@@ -187,10 +179,6 @@ router.post('/compare', (req, res, next) => {
               obj.distance += Math.sqrt(sum);
             } else if (metric === 'histIntersection') {
               obj.distance += (1 / (sum / Math.min(sumX, sumY))) - 1;
-            } else if (metric === 'matusita') {
-              obj.distance += Math.sqrt(sum);
-            } else if (metric === 'divergence') {
-              obj.distance += sum;
             }
 
             distances[desc].push(obj);
