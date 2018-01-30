@@ -46,6 +46,7 @@ export default {
       metric,
       descsSelected,
       numResults,
+      halfDims,
     }) => {
       const vecs = {};
       this.images.forEach((img) => {
@@ -62,6 +63,7 @@ export default {
           metric,
           vecs,
           numResults,
+          halfDims,
         })
         .then((res) => {
           this.images = res.data;
