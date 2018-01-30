@@ -15,6 +15,9 @@ descVecsSupported.forEach((e) => {
   imageObj[e.value] = {
     type: [Number],
   };
+  imageObj[`${e.value}Half`] = {
+    type: [Number],
+  };
 });
 
 const imageSchema = Schema(imageObj);
