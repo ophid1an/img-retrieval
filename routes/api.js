@@ -63,6 +63,7 @@ router.post('/compare', (req, res, next) => {
   const filename = req.body.filename;
   const metric = req.body.metric;
   const vecs = req.body.vecs;
+  const halfDims = req.body.halfDims;
   const metrics = metricsSupported.map(m => m.value);
   const descVecsSupportedObj = {};
   const badInput = () => res.status(400).json({
@@ -233,16 +234,29 @@ router.post('/compare', (req, res, next) => {
 
   if (isImgInDB) {
     const projection = {};
+
+    if (halfDims) {
+      descriptors.forEach((desc, descInd) => {
+        descriptors[descInd] = `${desc}Half`;
+      });
+    }
+
     descriptors.forEach((desc) => {
       projection[desc] = 1;
     });
+
     Image
       .find({
         filename,
       }, projection)
       .exec()
       .then((docs) => {
+        if (!docs.length) {
+          return badInput();
+        }
+
         const tmpDescs = descriptors.map(x => x);
+
         tmpDescs.forEach((desc) => {
           if (!docs[0][desc].length) {
             descriptors.splice(descriptors.indexOf(desc), 1);
