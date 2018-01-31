@@ -284,7 +284,9 @@ export default {
         };
 
         axios.post('/api/upload', this.formData, config)
-          .then(res => console.log(res))
+          .then((res) => {
+            console.log(res.data.msg);
+          })
           .catch(err => console.log(err));
       }
     },
