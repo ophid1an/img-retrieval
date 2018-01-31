@@ -11,96 +11,161 @@
   <image-modal v-show="isImageModalVisible"></image-modal>
 
   <section class="section">
-    <div class="container box">
 
-      <div class="form">
-        <div class="icon has-text-link" @click="onFormAngleClick">
-          <i class="fa fa-2x" :class="{ 'fa-angle-right': !isFormVisible, 'fa-angle-down': isFormVisible }"></i>
-        </div>
+    <tabs>
 
-        <form :class="{ 'is-hidden': !isFormVisible}" @submit.prevent="onFormSubmit">
+      <tab name="Retrieve images" :selected="true">
+        <div class="container box">
 
-          <template v-for="desc in descs">
-            <div class="field">
-              <label class="label" v-text="desc.text"></label>
-              <div class="control has-icons-right">
-                <input class="input" type="text" v-model="desc.vecStr" :placeholder="`${desc.len} features`" @focus="inInput(desc)" @blur="computeVec(desc)">
-                <span class="icon is-small is-right" :class="getInputIconColor(desc)">
-                  <i class="fa" :class="getInputIconType(desc)"></i>
-                </span>
-              </div>
+          <div class="form">
+            <div class="icon has-text-link" @click="onFormAngleClick">
+              <i class="fa fa-2x" :class="{ 'fa-angle-right': !isFormVisible, 'fa-angle-down': isFormVisible }"></i>
             </div>
-          </template>
+
+            <form :class="{ 'is-hidden': !isFormVisible}" @submit.prevent="onFormSubmit">
+
+              <template v-for="desc in descs">
+                <div class="field">
+                  <label class="label" v-text="desc.text"></label>
+                  <div class="control has-icons-right">
+                    <input class="input" type="text" v-model="desc.vecStr" :placeholder="`${desc.len} features`" @focus="inInput(desc)" @blur="computeVec(desc)">
+                    <span class="icon is-small is-right" :class="getInputIconColor(desc)">
+                      <i class="fa" :class="getInputIconType(desc)"></i>
+                    </span>
+                  </div>
+                </div>
+              </template>
+
+              <div class="field">
+                <div class="control">
+                  <button class="button is-link" :disabled="!isFormSubmissible">Submit</button>
+                </div>
+              </div>
+
+            </form>
+          </div>
 
           <div class="field">
+            <input id="halfDims" type="checkbox" class="switch is-info is-rtl" v-model="halfDims">
+            <label for="halfDims" class="label">Use half dimensions</label>
+          </div>
+
+          <div class="field">
+            <label class="label">Number of results</label>
             <div class="control">
-              <button class="button is-link" :disabled="!isFormSubmissible">Submit</button>
+              <input class="slider is-fullwidth is-info has-output" v-model="numResults.default" step="1" :min="numResults.min" :max="numResults.max" type="range">
+              <output>{{ numResults.default }}</output>
             </div>
           </div>
 
-        </form>
-      </div>
-
-      <div class="field">
-        <input id="halfDims" type="checkbox" class="switch is-info is-rtl" v-model="halfDims">
-        <label for="halfDims" class="label">Use half dimensions</label>
-      </div>
-
-      <div class="field">
-        <label class="label">Number of results</label>
-        <div class="control">
-          <input class="slider is-fullwidth is-info has-output" v-model="numResults.default" step="1" :min="numResults.min" :max="numResults.max" type="range">
-          <output>{{ numResults.default }}</output>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Metric</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="metricSelected">
-              <option v-for="metric in metrics" :value="metric.value">{{ metric.text }}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Descriptors</label>
-
-        <template v-for="desc in descs">
-          <label class="checkbox">
+          <div class="field">
+            <label class="label">Metric</label>
             <div class="control">
-              <input type="checkbox" :value="desc.value" v-model="descsSelected">
-              {{ desc.text }}
+              <div class="select">
+                <select v-model="metricSelected">
+                  <option v-for="metric in metrics" :value="metric.value">{{ metric.text }}</option>
+                </select>
+              </div>
             </div>
-          </label>
-        </template>
-      </div>
+          </div>
 
-    </div>
+          <div class="field">
+            <label class="label">Descriptors</label>
+
+            <template v-for="desc in descs">
+              <label class="checkbox">
+                <div class="control">
+                  <input type="checkbox" :value="desc.value" v-model="descsSelected">
+                  {{ desc.text }}
+                </div>
+              </label>
+            </template>
+          </div>
+
+        </div>
+
+        <section class="section">
+          <div class="container box">
+            <image-list></image-list>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="container">
+            <div class="content has-text-centered">
+              <p> <small>&copy; 2017 Ioannis Dermentzoglou</small> </p>
+            </div>
+          </div>
+        </footer>
+
+      </tab>
+
+      <tab name="Upload images">
+        <div class="container box">
+
+          <form @submit.prevent="onUploadFormSubmit">
+
+            <div class="field">
+              <div class="control">
+                <div class="file">
+                  <label class="file-label">
+                    <input class="file-input" type="file" accept=".jpg, .jpeg" name="imageFiles" @change="onImageFilesInputChange" multiple>
+                    <span class="file-cta">
+                      <span class="file-icon">
+                        <i class="fa fa-upload"></i>
+                      </span>
+                      <span class="file-label">
+                        {{ getImageFilesInputMsg }}
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="control">
+                <div class="file">
+                  <label class="file-label">
+                    <input class="file-input" type="file" accept=".txt" name="textFile" @change="onTextFileInputChange">
+                    <span class="file-cta">
+                      <span class="file-icon">
+                        <i class="fa fa-upload"></i>
+                      </span>
+                      <span class="file-label">
+                        {{ getTextFileInputMsg }}
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="control">
+                <button class="button is-link" :disabled="!isUploadFormSubmissible">Submit</button>
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+
+      </tab>
+
+    </tabs>
+
   </section>
-
-  <section class="section">
-    <div class="container box">
-      <image-list></image-list>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <div class="container">
-      <div class="content has-text-centered">
-        <p> <small>&copy; 2017 Ioannis Dermentzoglou</small> </p>
-      </div>
-    </div>
-  </footer>
 
 </div>
 </template>
 
 <script>
+import axios from 'axios';
 import ImageList from './components/ImageList';
 import ImageModal from './components/ImageModal';
+import Tabs from './components/Tabs';
+import Tab from './components/Tab';
 import {
   descVecsSupported,
   metricsSupported,
@@ -112,6 +177,8 @@ export default {
   components: {
     ImageList,
     ImageModal,
+    Tabs,
+    Tab,
   },
   data() {
     return {
@@ -130,6 +197,9 @@ export default {
         obj.isInInput = false;
         return obj;
       }),
+      imageFilesNum: 0,
+      textFilename: '',
+      formData: new FormData(),
     };
   },
   methods: {
@@ -184,6 +254,42 @@ export default {
       }
       return res;
     },
+    onImageFilesInputChange(e) {
+      const files = e.target.files;
+
+      this.imageFilesNum = files.length;
+
+      if (files.length) {
+        return [...Array(files.length).keys()].forEach(ind => this.formData.append('images', files[ind]));
+      }
+
+      return this.formData.delete('images');
+    },
+    onTextFileInputChange(e) {
+      const files = e.target.files;
+
+      if (files.length) {
+        this.textFilename = files[0].name;
+        return this.formData.set('text', files[0]);
+      }
+
+      this.textFilename = '';
+      return this.formData.delete('text');
+    },
+    onUploadFormSubmit() {
+      if (this.isUploadFormSubmissible) {
+        console.log('SUBMITTING')
+        const config = {
+          headers: {
+            'content-type': 'multipart/form-data',
+          },
+        };
+
+        axios.post('/api/upload', this.formData, config)
+          .then(res => console.log(res))
+          .catch(err => console.log(err));
+      }
+    },
     onFormAngleClick() {
       this.isFormVisible = !this.isFormVisible;
     },
@@ -221,6 +327,24 @@ export default {
         }
       });
       return isOneFieldGood && areAllFieldsGood;
+    },
+    isUploadFormSubmissible() {
+      return (this.imageFilesNum > 0 && this.textFilename);
+    },
+    getImageFilesInputMsg() {
+      if (this.imageFilesNum > 0) {
+        if (this.imageFilesNum === 1) {
+          return '1 image';
+        }
+        return `${this.imageFilesNum} images`;
+      }
+      return 'Choose image files…';
+    },
+    getTextFileInputMsg() {
+      if (this.textFilename) {
+        return this.textFilename;
+      }
+      return 'Choose descriptor vectors text file…';
     },
   },
   created() {
