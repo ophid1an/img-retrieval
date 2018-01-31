@@ -19,6 +19,8 @@ selenium-debug.log
 #
 misc/
 public/
+uploads/*
+!uploads/.gitkeep
 .env
 *.bak
 *.bak.*
@@ -48,5 +50,3 @@ coverage
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
-
-

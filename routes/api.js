@@ -1,8 +1,24 @@
 const express = require('express');
+const readline = require('readline');
+const fs = require('fs');
 const Image = require('../models/image');
 const descVecsSupported = require('../config/server.conf').descVecsSupported;
 const metricsSupported = require('../config/server.conf').metricsSupported;
 const numNeighbors = require('../config/server.conf').numNeighbors;
+const uploadFolder = require('../config/server.conf').uploadFolder;
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, uploadFolder);
+  },
+  filename(req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({
+  storage,
+});
 
 const router = express.Router();
 
@@ -56,6 +72,81 @@ router.get('/random', (req, res, next) => {
     })
     .then(docs => res.json(docs))
     .catch(err => next(err));
+});
+
+router.post('/upload', upload.fields([{
+  name: 'images',
+  maxCount: 50,
+}, {
+  name: 'text',
+  maxCount: 1,
+}]), (req, res) => {
+  // TODO: Verification, error handling in parsing
+  const imagesInput = [];
+  const imagesFilenames = [];
+  const textFilePath = req.files.text[0].path;
+  const images = [];
+  const imagesPath = 'static/images/data/';
+  const thumbsPath = 'static/images/data/thumbs/';
+  let image = {};
+  let firstImage = true;
+
+  req.files.images.forEach(({
+    filename,
+    path,
+  }) => {
+    imagesInput.push({
+      filename,
+      path,
+    });
+    imagesFilenames.push(filename);
+  });
+
+  const rl = readline.createInterface({
+    input: fs.createReadStream(textFilePath),
+    crlfDelay: Infinity,
+  });
+
+  rl.on('line', (line) => {
+    const lineArr = line.replace(/,/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .split(' ');
+
+    if (lineArr.length > 1) {
+      if (lineArr[0] === 'filename') {
+        if (!firstImage) {
+          if (imagesFilenames.indexOf(image.filename) !== -1) {
+            images.push(Object.assign({}, image));
+          }
+        }
+        image = {};
+        image[lineArr[0]] = lineArr[1];
+        firstImage = false;
+      } else {
+        image[lineArr[0]] = lineArr.slice(1);
+      }
+    }
+  }).on('close', () => {
+    if (imagesFilenames.indexOf(image.filename) !== -1) {
+      images.push(Object.assign({}, image));
+    }
+
+    return Image.insertMany(images)
+      .then((docs) => {
+        images.forEach((img) => {
+          const imgPath = imagesInput[imagesFilenames.indexOf(img.filename)].path;
+          fs.copyFileSync(imgPath, `${thumbsPath}${img.filename}`);
+          fs.copyFileSync(imgPath, `${imagesPath}${img.filename}`);
+        });
+        return res.json({
+          msg: `Done uploading ${docs.length} images.`,
+        });
+      })
+      .catch(err => res.status(500).json({
+        err,
+      }));
+  });
 });
 
 

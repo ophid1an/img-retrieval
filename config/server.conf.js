@@ -59,3 +59,5 @@ exports.numNeighbors = {
   min: 2,
   max: 50,
 };
+
+exports.uploadFolder = 'uploads/';
