@@ -258,27 +258,25 @@ export default {
       const files = e.target.files;
 
       this.imageFilesNum = files.length;
+      this.formData.delete('images');
 
       if (files.length) {
-        return [...Array(files.length).keys()].forEach(ind => this.formData.append('images', files[ind]));
+        [...Array(files.length).keys()].forEach(ind => this.formData.append('images', files[ind]));
       }
-
-      return this.formData.delete('images');
     },
     onTextFileInputChange(e) {
       const files = e.target.files;
 
+      this.textFilename = '';
+      this.formData.delete('text');
+
       if (files.length) {
         this.textFilename = files[0].name;
-        return this.formData.set('text', files[0]);
+        this.formData.set('text', files[0]);
       }
-
-      this.textFilename = '';
-      return this.formData.delete('text');
     },
     onUploadFormSubmit() {
       if (this.isUploadFormSubmissible) {
-        console.log('SUBMITTING')
         const config = {
           headers: {
             'content-type': 'multipart/form-data',
