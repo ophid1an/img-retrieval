@@ -44,14 +44,6 @@ exports.metricsSupported = [{
     text: 'Manhattan distance',
     value: 'manhattan',
   },
-  // {
-  //   text: 'Matusita distance',
-  //   value: 'matusita',
-  // },
-  // {
-  //   text: 'Divergence',
-  //   value: 'divergence',
-  // },
 ];
 
 exports.numNeighbors = {
